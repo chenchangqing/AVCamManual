@@ -102,7 +102,8 @@
 				TargetAttributes = {
 					7A49F5991B38C02B003D7AF5 = {
 						CreatedOnToolsVersion = 7.0;
-						DevelopmentTeam = RZW8NP7M8Y;
+						DevelopmentTeam = GVY2W5C59W;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -262,13 +263,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = RZW8NP7M8Y;
+				DEVELOPMENT_TEAM = GVY2W5C59W;
 				INFOPLIST_FILE = "$(SRCROOT)/AVCamManual/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.AVCamManual";
 				PRODUCT_NAME = AVCamManual;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "d54bf5a2-0761-48cf-98a6-b03dc7fc6c9e";
+				PROVISIONING_PROFILE_SPECIFIER = chenchangqing_development;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -278,14 +280,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = RZW8NP7M8Y;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				DEVELOPMENT_TEAM = GVY2W5C59W;
 				INFOPLIST_FILE = "$(SRCROOT)/AVCamManual/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.AVCamManual";
 				PRODUCT_NAME = AVCamManual;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "61c8ce49-9012-48a3-be53-e348ec13de80";
+				PROVISIONING_PROFILE_SPECIFIER = chenchangqing_distribution;
 				SDKROOT = iphoneos;
 			};
 			name = Release;

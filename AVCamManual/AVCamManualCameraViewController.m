@@ -13,95 +13,95 @@
 #import "AVCamManualPreviewView.h"
 #import "AVCamManualPhotoCaptureDelegate.h"
 
-static void * SessionRunningContext = &SessionRunningContext;
-static void * FocusModeContext = &FocusModeContext;
-static void * ExposureModeContext = &ExposureModeContext;
-static void * WhiteBalanceModeContext = &WhiteBalanceModeContext;
-static void * LensPositionContext = &LensPositionContext;
-static void * ExposureDurationContext = &ExposureDurationContext;
-static void * ISOContext = &ISOContext;
-static void * ExposureTargetBiasContext = &ExposureTargetBiasContext;
-static void * ExposureTargetOffsetContext = &ExposureTargetOffsetContext;
-static void * DeviceWhiteBalanceGainsContext = &DeviceWhiteBalanceGainsContext;
+static void * SessionRunningContext = &SessionRunningContext;                   // 会话运行状态
+static void * FocusModeContext = &FocusModeContext;                             // 对焦模式
+static void * ExposureModeContext = &ExposureModeContext;                       // 曝光模式
+static void * WhiteBalanceModeContext = &WhiteBalanceModeContext;               // 白平衡模式
+static void * LensPositionContext = &LensPositionContext;                       // 镜头位置
+static void * ExposureDurationContext = &ExposureDurationContext;               // 曝光时间
+static void * ISOContext = &ISOContext;                                         // 感光度
+static void * ExposureTargetBiasContext = &ExposureTargetBiasContext;           // 曝光补偿
+static void * ExposureTargetOffsetContext = &ExposureTargetOffsetContext;       // 曝光偏移
+static void * DeviceWhiteBalanceGainsContext = &DeviceWhiteBalanceGainsContext; // 白平衡
 
 typedef NS_ENUM( NSInteger, AVCamManualSetupResult ) {
-	AVCamManualSetupResultSuccess,
-	AVCamManualSetupResultCameraNotAuthorized,
-	AVCamManualSetupResultSessionConfigurationFailed
+	AVCamManualSetupResultSuccess,                      // 相机设置成功
+	AVCamManualSetupResultCameraNotAuthorized,          // 相机未授权
+	AVCamManualSetupResultSessionConfigurationFailed    // 相机设置失败
 };
 
 typedef NS_ENUM( NSInteger, AVCamManualCaptureMode ) {
-	AVCamManualCaptureModePhoto = 0,
-	AVCamManualCaptureModeMovie = 1
+	AVCamManualCaptureModePhoto = 0,    // 照片
+	AVCamManualCaptureModeMovie = 1     // 视频
 };
 
 @interface AVCamManualCameraViewController () <AVCaptureFileOutputRecordingDelegate>
 
-@property (nonatomic, weak) IBOutlet AVCamManualPreviewView *previewView;
-@property (nonatomic, weak) IBOutlet UISegmentedControl *captureModeControl;
-@property (nonatomic, weak) IBOutlet UILabel *cameraUnavailableLabel;
-@property (nonatomic, weak) IBOutlet UIButton *resumeButton;
-@property (nonatomic, weak) IBOutlet UIButton *recordButton;
-@property (nonatomic, weak) IBOutlet UIButton *cameraButton;
-@property (nonatomic, weak) IBOutlet UIButton *photoButton;
-@property (nonatomic, weak) IBOutlet UIButton *HUDButton;
+@property (nonatomic, weak) IBOutlet AVCamManualPreviewView *previewView;               // 显示相机输出图像
+@property (nonatomic, weak) IBOutlet UISegmentedControl *captureModeControl;            // 切换照相/录像
+@property (nonatomic, weak) IBOutlet UILabel *cameraUnavailableLabel;                   // 相机运行中断提示
+@property (nonatomic, weak) IBOutlet UIButton *resumeButton;                            // 相机中断恢复按钮
+@property (nonatomic, weak) IBOutlet UIButton *recordButton;                            // 录像按钮
+@property (nonatomic, weak) IBOutlet UIButton *cameraButton;                            // 切换摄像头
+@property (nonatomic, weak) IBOutlet UIButton *photoButton;                             // 拍照按钮
+@property (nonatomic, weak) IBOutlet UIButton *HUDButton;                               // 显示hud设置
 
-@property (nonatomic, weak) IBOutlet UIView *manualHUD;
+@property (nonatomic, weak) IBOutlet UIView *manualHUD;                                 // 手动设置hud
 
-@property (nonatomic) NSArray *focusModes;
-@property (nonatomic, weak) IBOutlet UIView *manualHUDFocusView;
-@property (nonatomic, weak) IBOutlet UISegmentedControl *focusModeControl;
-@property (nonatomic, weak) IBOutlet UISlider *lensPositionSlider;
-@property (nonatomic, weak) IBOutlet UILabel *lensPositionNameLabel;
-@property (nonatomic, weak) IBOutlet UILabel *lensPositionValueLabel;
+@property (nonatomic) NSArray *focusModes;                                              // 对焦模式数组
+@property (nonatomic, weak) IBOutlet UIView *manualHUDFocusView;                        // 对焦手动控制视图
+@property (nonatomic, weak) IBOutlet UISegmentedControl *focusModeControl;              // 对焦模式选择
+@property (nonatomic, weak) IBOutlet UISlider *lensPositionSlider;                      // 滑动调节镜头位置
+@property (nonatomic, weak) IBOutlet UILabel *lensPositionNameLabel;                    // 镜头位置
+@property (nonatomic, weak) IBOutlet UILabel *lensPositionValueLabel;                   // 镜头位置当前值(0.0~1.0)
 
-@property (nonatomic) NSArray *exposureModes;
-@property (nonatomic, weak) IBOutlet UIView *manualHUDExposureView;
-@property (nonatomic, weak) IBOutlet UISegmentedControl *exposureModeControl;
-@property (nonatomic, weak) IBOutlet UISlider *exposureDurationSlider;
-@property (nonatomic, weak) IBOutlet UILabel *exposureDurationNameLabel;
-@property (nonatomic, weak) IBOutlet UILabel *exposureDurationValueLabel;
-@property (nonatomic, weak) IBOutlet UISlider *ISOSlider;
-@property (nonatomic, weak) IBOutlet UILabel *ISONameLabel;
-@property (nonatomic, weak) IBOutlet UILabel *ISOValueLabel;
-@property (nonatomic, weak) IBOutlet UISlider *exposureTargetBiasSlider;
-@property (nonatomic, weak) IBOutlet UILabel *exposureTargetBiasNameLabel;
-@property (nonatomic, weak) IBOutlet UILabel *exposureTargetBiasValueLabel;
-@property (nonatomic, weak) IBOutlet UISlider *exposureTargetOffsetSlider;
-@property (nonatomic, weak) IBOutlet UILabel *exposureTargetOffsetNameLabel;
-@property (nonatomic, weak) IBOutlet UILabel *exposureTargetOffsetValueLabel;
+@property (nonatomic) NSArray *exposureModes;                                           // 曝光模式数组
+@property (nonatomic, weak) IBOutlet UIView *manualHUDExposureView;                     // 曝光手动控制视图
+@property (nonatomic, weak) IBOutlet UISegmentedControl *exposureModeControl;           // 曝光模式选择
+@property (nonatomic, weak) IBOutlet UISlider *exposureDurationSlider;                  // 滑动调节曝光时间
+@property (nonatomic, weak) IBOutlet UILabel *exposureDurationNameLabel;                // 曝光时间
+@property (nonatomic, weak) IBOutlet UILabel *exposureDurationValueLabel;               // 曝光时间当前值
+@property (nonatomic, weak) IBOutlet UISlider *ISOSlider;                               // 滑动调节感光度
+@property (nonatomic, weak) IBOutlet UILabel *ISONameLabel;                             // 感光度
+@property (nonatomic, weak) IBOutlet UILabel *ISOValueLabel;                            // 感光度当前值
+@property (nonatomic, weak) IBOutlet UISlider *exposureTargetBiasSlider;                // 滑动调节曝光补偿
+@property (nonatomic, weak) IBOutlet UILabel *exposureTargetBiasNameLabel;              // 曝光补偿
+@property (nonatomic, weak) IBOutlet UILabel *exposureTargetBiasValueLabel;             // 曝光补偿当前值
+@property (nonatomic, weak) IBOutlet UISlider *exposureTargetOffsetSlider;              // 显示曝光便宜
+@property (nonatomic, weak) IBOutlet UILabel *exposureTargetOffsetNameLabel;            // 曝光偏移
+@property (nonatomic, weak) IBOutlet UILabel *exposureTargetOffsetValueLabel;           // 曝光偏移值
 
-@property (nonatomic) NSArray *whiteBalanceModes;
-@property (nonatomic, weak) IBOutlet UIView *manualHUDWhiteBalanceView;
-@property (nonatomic, weak) IBOutlet UISegmentedControl *whiteBalanceModeControl;
-@property (nonatomic, weak) IBOutlet UISlider *temperatureSlider;
-@property (nonatomic, weak) IBOutlet UILabel *temperatureNameLabel;
-@property (nonatomic, weak) IBOutlet UILabel *temperatureValueLabel;
-@property (nonatomic, weak) IBOutlet UISlider *tintSlider;
-@property (nonatomic, weak) IBOutlet UILabel *tintNameLabel;
-@property (nonatomic, weak) IBOutlet UILabel *tintValueLabel;
+@property (nonatomic) NSArray *whiteBalanceModes;                                       // 白平衡模式数组
+@property (nonatomic, weak) IBOutlet UIView *manualHUDWhiteBalanceView;                 // 白平衡手动控制视图
+@property (nonatomic, weak) IBOutlet UISegmentedControl *whiteBalanceModeControl;       // 白平衡模式选择
+@property (nonatomic, weak) IBOutlet UISlider *temperatureSlider;                       // 滑动调节温度
+@property (nonatomic, weak) IBOutlet UILabel *temperatureNameLabel;                     // 温度
+@property (nonatomic, weak) IBOutlet UILabel *temperatureValueLabel;                    // 温度当前值
+@property (nonatomic, weak) IBOutlet UISlider *tintSlider;                              // 滑动调节色彩
+@property (nonatomic, weak) IBOutlet UILabel *tintNameLabel;                            // 色彩
+@property (nonatomic, weak) IBOutlet UILabel *tintValueLabel;                           // 色彩当前值
 
-@property (nonatomic, weak) IBOutlet UIView *manualHUDLensStabilizationView;
-@property (nonatomic, weak) IBOutlet UISegmentedControl *lensStabilizationControl;
+@property (nonatomic, weak) IBOutlet UIView *manualHUDLensStabilizationView;            // 光学防抖
+@property (nonatomic, weak) IBOutlet UISegmentedControl *lensStabilizationControl;      // 开启/关闭光学防抖
 
-@property (nonatomic, weak) IBOutlet UIView *manualHUDPhotoView;
-@property (nonatomic, weak) IBOutlet UISegmentedControl *rawControl;
+@property (nonatomic, weak) IBOutlet UIView *manualHUDPhotoView;                        // raw格式相片
+@property (nonatomic, weak) IBOutlet UISegmentedControl *rawControl;                    // 开启/关闭raw格式相片
 
 // Session management
-@property (nonatomic) dispatch_queue_t sessionQueue;
-@property (nonatomic) AVCaptureSession *session;
-@property (nonatomic) AVCaptureDeviceInput *videoDeviceInput;
-@property (nonatomic) AVCaptureDeviceDiscoverySession *videoDeviceDiscoverySession;
-@property (nonatomic) AVCaptureDevice *videoDevice;
-@property (nonatomic) AVCaptureMovieFileOutput *movieFileOutput;
-@property (nonatomic) AVCapturePhotoOutput *photoOutput;
+@property (nonatomic) dispatch_queue_t sessionQueue;                                    // 会话操作队列
+@property (nonatomic) AVCaptureSession *session;                                        // 会话
+@property (nonatomic) AVCaptureDeviceInput *videoDeviceInput;                           // 设备输入
+@property (nonatomic) AVCaptureDeviceDiscoverySession *videoDeviceDiscoverySession;     // 发现设备
+@property (nonatomic) AVCaptureDevice *videoDevice;                                     // 设备
+@property (nonatomic) AVCaptureMovieFileOutput *movieFileOutput;                        // 视频输出
+@property (nonatomic) AVCapturePhotoOutput *photoOutput;                                // 相片输出
 
-@property (nonatomic) NSMutableDictionary<NSNumber *, AVCamManualPhotoCaptureDelegate *> *inProgressPhotoCaptureDelegates;
+@property (nonatomic) NSMutableDictionary<NSNumber *, AVCamManualPhotoCaptureDelegate *> *inProgressPhotoCaptureDelegates;  // 拍照代理字典
 
 // Utilities
-@property (nonatomic) AVCamManualSetupResult setupResult;
-@property (nonatomic, getter=isSessionRunning) BOOL sessionRunning;
-@property (nonatomic) UIBackgroundTaskIdentifier backgroundRecordingID;
+@property (nonatomic) AVCamManualSetupResult setupResult;               // 相机设置结果
+@property (nonatomic, getter=isSessionRunning) BOOL sessionRunning;     // 会话是否运行
+@property (nonatomic) UIBackgroundTaskIdentifier backgroundRecordingID; // 后台长久运行标示符
 
 @end
 
@@ -357,6 +357,7 @@ static const float kExposureMinimumDuration = 1.0/1000; // Limit exposure durati
 	self.rawControl.selectedSegmentIndex = 0;
 }
 
+// 点击hud
 - (IBAction)toggleHUD:(id)sender
 {
 	self.manualHUD.hidden = ! self.manualHUD.hidden;
@@ -421,6 +422,13 @@ static const float kExposureMinimumDuration = 1.0/1000; // Limit exposure durati
 	NSError *error = nil;
 	
 	[self.session beginConfiguration];
+    
+    // AVCaptureSessionPresetHigh High 最高的录制质量，每台设备不同
+    // AVCaptureSessionPresetMedium Medium 基于无线分享的，实际值可能会改变
+    // AVCaptureSessionPresetLow LOW 基于3g分享的
+    // AVCaptureSessionPreset640x480 640x480 VGA
+    // AVCaptureSessionPreset1280x720 1280x720 720p HD
+    // AVCaptureSessionPresetPhoto Photo 完整的照片分辨率，不支持视频输出
 	
 	self.session.sessionPreset = AVCaptureSessionPresetPhoto;
 	
@@ -560,6 +568,7 @@ static const float kExposureMinimumDuration = 1.0/1000; // Limit exposure durati
 	return photoSettings;
 }
 
+// 恢复中断的相机
 - (IBAction)resumeInterruptedSession:(id)sender
 {
 	dispatch_async( self.sessionQueue, ^{
@@ -629,6 +638,7 @@ static const float kExposureMinimumDuration = 1.0/1000; // Limit exposure durati
 
 #pragma mark Device Configuration
 
+// 切换摄像头
 - (IBAction)chooseNewCamera:(id)sender
 {
 	// Present all available cameras
@@ -914,6 +924,7 @@ static const float kExposureMinimumDuration = 1.0/1000; // Limit exposure durati
 
 #pragma mark Capturing Photos
 
+// 拍照
 - (IBAction)capturePhoto:(id)sender
 {
 	// Retrieve the video preview layer's video orientation on the main queue before entering the session queue
@@ -956,6 +967,7 @@ static const float kExposureMinimumDuration = 1.0/1000; // Limit exposure durati
 
 #pragma mark Recording Movies
 
+// 录像
 - (IBAction)toggleMovieRecording:(id)sender
 {
 	// Disable the Camera button until recording finishes, and disable the Record button until recording starts or finishes (see the AVCaptureFileOutputRecordingDelegate methods)

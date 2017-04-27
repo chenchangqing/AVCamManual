@@ -39,6 +39,7 @@
 	self.completed( self );
 }
 
+// 在听到快门声音后立即发出回调
 - (void)captureOutput:(AVCapturePhotoOutput *)captureOutput willCapturePhotoForResolvedSettings:(AVCaptureResolvedPhotoSettings *)resolvedSettings
 {
 	self.willCapturePhotoAnimation();
